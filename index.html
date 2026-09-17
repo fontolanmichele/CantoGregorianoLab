@@ -2285,17 +2285,26 @@ async function initChoirAudio(){
     reverbNode.buffer = createAbbeyImpulse(audioCtx);
     reverbNode.connect(masterGain);
 
-    // Decodifica il campione direttamente dalla stringa Base64.
-    // È più affidabile quando il file HTML viene aperto direttamente dal computer (file://).
-    const base64 = choirSampleData.split(",")[1];
-    const binary = atob(base64);
-    const bytes = new Uint8Array(binary.length);
-    for(let i=0; i<binary.length; i++) bytes[i] = binary.charCodeAt(i);
-
+    // Carica il campione corale.
+    // Supporta sia un file esterno nella cartella assets sia, eventualmente, un data URI Base64.
     try{
-      choirBuffer = await audioCtx.decodeAudioData(bytes.buffer.slice(0));
+      let arrayBuffer;
+
+      if(choirSampleData.startsWith("data:")){
+        const base64 = choirSampleData.split(",")[1];
+        const binary = atob(base64);
+        const bytes = new Uint8Array(binary.length);
+        for(let i=0; i<binary.length; i++) bytes[i] = binary.charCodeAt(i);
+        arrayBuffer = bytes.buffer.slice(0);
+      }else{
+        const response = await fetch(choirSampleData);
+        if(!response.ok) throw new Error("Impossibile caricare il campione audio");
+        arrayBuffer = await response.arrayBuffer();
+      }
+
+      choirBuffer = await audioCtx.decodeAudioData(arrayBuffer);
     }catch(err){
-      console.warn("Campione corale non decodificato: userò il fallback sintetico.", err);
+      console.warn("Campione corale non disponibile: userò il fallback sintetico.", err);
       choirBuffer = null;
     }
   })();
