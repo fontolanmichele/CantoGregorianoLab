@@ -1274,6 +1274,15 @@
     box-shadow:0 4px 10px rgba(82,62,41,.05);
   }
 
+
+  .top-controls + .wide-text-panel{
+    margin-top:0;
+  }
+
+  .wide-text-panel + .workspace-full{
+    margin-top:0;
+  }
+
 </style>
 
 </head>
@@ -1353,6 +1362,39 @@
     </div>
   </section>
 
+  
+    <section class="panel text-panel wide-text-panel">
+      <div class="panel-inner">
+        <div class="section-head">
+          <div class="section-badge">II</div>
+          <h2 class="section-title">Testo / sillabe</h2>
+        </div>
+
+        <div class="text-work-grid">
+          <div class="text-main-col">
+            <label for="lyricsInput">Inserisci il testo</label>
+            <textarea id="lyricsInput" placeholder="Esempio: Ky-ri-e / e-lei-son"></textarea>
+            <button class="mini-btn" id="prepareTextBtn" type="button">Prepara il testo</button>
+
+            <div class="small" style="margin-top:8px">
+              Usa il <strong>trattino</strong> per dividere le sillabe e il simbolo <strong>/</strong> per separare le frasi.
+            </div>
+          </div>
+
+          <div class="text-side-col">
+            <label>Sillaba successiva</label>
+            <div class="next-syllable next-syllable-large" id="nextSyllable">Nessun testo preparato.</div>
+
+            <label style="margin-top:18px">Assegnazione del testo</label>
+            <div class="toggle">
+              <button id="newSyllableBtn" class="active" type="button">Nuova sillaba</button>
+              <button id="melismaBtn" type="button">Continua sillaba</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
   <main class="panel workspace workspace-full">
     <div class="panel-inner">
       <div class="workspace-top">
@@ -1415,37 +1457,6 @@
 
   
   <div class="bottom-sections">
-    <section class="panel text-panel wide-text-panel">
-      <div class="panel-inner">
-        <div class="section-head">
-          <div class="section-badge">II</div>
-          <h2 class="section-title">Testo / sillabe</h2>
-        </div>
-
-        <div class="text-work-grid">
-          <div class="text-main-col">
-            <label for="lyricsInput">Inserisci il testo</label>
-            <textarea id="lyricsInput" placeholder="Esempio: Ky-ri-e / e-lei-son"></textarea>
-            <button class="mini-btn" id="prepareTextBtn" type="button">Prepara il testo</button>
-
-            <div class="small" style="margin-top:8px">
-              Usa il <strong>trattino</strong> per dividere le sillabe e il simbolo <strong>/</strong> per separare le frasi.
-            </div>
-          </div>
-
-          <div class="text-side-col">
-            <label>Sillaba successiva</label>
-            <div class="next-syllable next-syllable-large" id="nextSyllable">Nessun testo preparato.</div>
-
-            <label style="margin-top:18px">Assegnazione del testo</label>
-            <div class="toggle">
-              <button id="newSyllableBtn" class="active" type="button">Nuova sillaba</button>
-              <button id="melismaBtn" type="button">Continua sillaba</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
 
     <section class="panel sequence-panel">
       <div class="panel-inner">
@@ -2449,6 +2460,9 @@ document.getElementById("printParchmentBtn").addEventListener("click",()=>{
 <head>
 <meta charset="UTF-8">
 <title>${currentTitle.replace(/</g,"&lt;").replace(/>/g,"&gt;")}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=UnifrakturCook:wght@700&display=swap" rel="stylesheet">
 <style>
   @page{
     size:A4 landscape;
@@ -2540,9 +2554,10 @@ document.getElementById("printParchmentBtn").addEventListener("click",()=>{
     z-index:2;
     text-align:center;
     margin:0 0 7mm;
-    font-size:13pt;
-    letter-spacing:.12em;
-    text-transform:uppercase;
+    font-family:"UnifrakturCook","Old English Text MT","Lucida Blackletter",serif;
+    font-size:18pt;
+    font-weight:700;
+    letter-spacing:.04em;
     color:#68462b;
   }
 
@@ -2560,6 +2575,13 @@ document.getElementById("printParchmentBtn").addEventListener("click",()=>{
     height:auto !important;
     display:block;
     background:transparent !important;
+  }
+
+  /* Mantiene il carattere gotico anche nella stampa.
+     Riguarda titolo del brano, capolettera e sillabe sotto le note. */
+  .parchment svg text[font-family*="UnifrakturCook"]{
+    font-family:"UnifrakturCook","Old English Text MT","Lucida Blackletter",serif !important;
+    font-weight:700 !important;
   }
 
   .footer{
@@ -2594,11 +2616,19 @@ document.getElementById("printParchmentBtn").addEventListener("click",()=>{
   </div>
 
 <script>
-  window.addEventListener("load", function(){
+  window.addEventListener("load", async function(){
+    try{
+      if(document.fonts && document.fonts.ready){
+        await document.fonts.ready;
+      }
+    }catch(e){}
+
+    /* Un brevissimo margine aggiuntivo evita che Chrome stampi
+       il primo frame con il font di fallback. */
     setTimeout(function(){
       window.focus();
       window.print();
-    }, 350);
+    }, 250);
   });
 <\/script>
 </body>
